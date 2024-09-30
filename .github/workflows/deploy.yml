@@ -3,7 +3,7 @@ name: Deploy to IIS
 on:
   push:
     branches:
-      - main  # Trigger this action when code is pushed to the main branch
+      - main
 
 jobs:
   deploy:
@@ -13,19 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Build React app
-      - name: Build React app
+      # Set up the PATH for MSDeploy
+      - name: Add MSDeploy to PATH
         run: |
-          npm install
-          npm run build
+          echo "C:\Program Files\IIS\Microsoft Web Deploy V3" # Adjust this path if your MSDeploy is installed elsewhere
 
-      # Package application using PowerShell
       - name: Package Application
         run: |
-          New-Item -ItemType Directory -Path output -Force
-          Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip
+          mkdir output
+          powershell -Command "Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip"
 
-      # Deploy to IIS
       - name: Deploy to IIS
         env:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
