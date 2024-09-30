@@ -41,7 +41,7 @@ jobs:
           mkdir output
           powershell -Command "Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip"
 
-      - name: Deploy to IIS
+     - name: Deploy to IIS
         env:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -56,4 +56,4 @@ jobs:
           icacls $sshKeyPath /grant:r "$($env:USERNAME):(R)"
 
           # Run the msdeploy command
-          powershell -Command "& 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',key='$sshKeyPath',authtype=ssh -setParam:name='IIS Web Application Name',value='\"$IIS_SITE\"'"
+          powershell -Command "& 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',key='$sshKeyPath',authtype=ssh -setParam:name='actionTest.com',value='\"$IIS_SITE\"'"
