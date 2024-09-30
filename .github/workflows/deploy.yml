@@ -47,9 +47,5 @@ jobs:
           IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
           IIS_SITE: ${{ secrets.IIS_SITE }}
-        run: |
-          & 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' `
-          -verb:sync `
-          -source:package='output/ReactApp.zip' `
-          -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',password='$IIS_PASSWORD',authtype=Basic `
-          -setParam:name='ActionTest',value='$IIS_SITE'
+        
+
