@@ -54,4 +54,6 @@ jobs:
           # Set the correct permissions for the SSH key
           icacls $sshKeyPath /inheritance:r
           icacls $sshKeyPath /grant:r "$($env:USERNAME):(R)"
-          powershell -Command "& 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',key='$sshKeyPath',authtype=ssh -setParam:name='IIS Web Application Name',value='$IIS_SITE'"
+
+          # Run the msdeploy command
+          powershell -Command "& 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',key='$sshKeyPath',authtype=ssh -setParam:name='IIS Web Application Name',value='\"$IIS_SITE\"'"
