@@ -29,7 +29,12 @@ jobs:
       # Set up the PATH for MSDeploy
       - name: Add MSDeploy to PATH
         run: |
-          echo "C:\Program Files\IIS\Microsoft Web Deploy V3" # Adjust this path if your MSDeploy is installed elsewhere
+          echo "##[add-path]C:\Program Files\IIS\Microsoft Web Deploy V3"
+
+      # Optional: Check PATH to verify if MSDeploy path is set
+      - name: Check PATH
+        run: |
+          echo $Env:PATH
 
       - name: Package Application
         run: |
