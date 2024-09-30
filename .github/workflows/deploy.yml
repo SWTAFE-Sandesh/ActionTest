@@ -52,5 +52,5 @@ jobs:
           -verb:sync `
           -source:package='output/ReactApp.zip' `
           -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',password='$IIS_PASSWORD',authtype=Basic `
-          -setParam:name='IIS Web Application Name',value=$IIS_SITE
+          -setParam:name='$IIS_SITE'
 
