@@ -41,7 +41,7 @@ jobs:
           mkdir output
           powershell -Command "Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip"
 
-     - name: Deploy to IIS
+      - name: Deploy to IIS
         env:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
