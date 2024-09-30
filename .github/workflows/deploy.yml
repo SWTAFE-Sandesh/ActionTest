@@ -44,16 +44,12 @@ jobs:
       - name: Deploy to IIS
         env:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }} 
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
           IIS_SITE: ${{ secrets.IIS_SITE }}
         run: |
-          # Save the SSH key to a temporary file
-          $sshKeyPath = "$env:TEMP\id_rsa"
-          [System.IO.File]::WriteAllText($sshKeyPath, $env:SSH_PRIVATE_KEY)
-          # Set the correct permissions for the SSH key
-          icacls $sshKeyPath /inheritance:r
-          icacls $sshKeyPath /grant:r "$($env:USERNAME):(R)"
-
-          # Run the msdeploy command
-          powershell -Command "& 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',key='$sshKeyPath',authtype=ssh -setParam:name='ActionTest',value='$IIS_SITE'"
+            & 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' `
+            -verb:sync `
+            -source:package='output/ReactApp.zip' `
+            -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',password='$IIS_PASSWORD',authtype=Basic `
+            -setParam:name='IIS Web Application Name',value='$IIS_SITE'
