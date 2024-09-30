@@ -29,7 +29,7 @@ jobs:
       # Set up the PATH for MSDeploy
       - name: Add MSDeploy to PATH
         run: |
-          echo "##[add-path]C:\Program Files\IIS\Microsoft Web Deploy V3"
+          echo "C:\Program Files\IIS\Microsoft Web Deploy V3" >> $GITHUB_PATH
 
       # Optional: Check PATH to verify if MSDeploy path is set
       - name: Check PATH
