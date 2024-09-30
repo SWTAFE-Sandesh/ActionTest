@@ -1,42 +1,35 @@
-name: Deploy to IIS
-
-on:
-  push:
-    branches:
-      - main  # Deploy when code is pushed to the main branch
-
 jobs:
   deploy:
-    runs-on: windows-latest  # Use a Windows environment to deploy
+    runs-on: windows-latest
 
     steps:
-      # Step 1: Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Install MSDeploy on the runner machine
-      - name: Setup MSDeploy
+      # Manually Download and Install MSDeploy
+      - name: Install MSDeploy
         run: |
-          choco install -y msdeploy  # Install MSDeploy via Chocolatey
+          Invoke-WebRequest -Uri https://download.microsoft.com/download/F/B/5/FB54A1B1-B143-4EE0-BB38-9DF4B85A5B0D/WebDeploy_amd64_en-US.msi -OutFile WebDeploy.msi
+          Start-Process msiexec.exe -Wait -ArgumentList '/I WebDeploy.msi /quiet /norestart'
 
-      # Step 3: Build your React app
+      # Build React app
       - name: Build React app
         run: |
-          npm install   # Install npm dependencies
-          npm run build # Build the React app for production
+          npm install
+          npm run build
 
-      # Step 4: Package the built app into a .zip file for deployment
+      # Package application
       - name: Package Application
         run: |
           mkdir output
-          zip -r output/ReactApp.zip ./build  # Zip the 'build' folder (React production build)
+          zip -r output/ReactApp.zip ./build
 
-      # Step 5: Deploy the packaged app to IIS using MSDeploy
+      # Deploy to IIS
       - name: Deploy to IIS
         env:
-          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}  # GitHub secrets for security
+          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
           IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          IIS_SITE: ${{ secrets.IIS_SITE }}  # Name of your IIS site
+          IIS_SITE: ${{ secrets.IIS_SITE }}
         run: |
           msdeploy -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName=$IIS_SERVER,username=$IIS_USERNAME,password=$IIS_PASSWORD,authtype=Basic -setParam:name='IIS Web Application Name',value='$IIS_SITE'
