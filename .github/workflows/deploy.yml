@@ -19,11 +19,11 @@ jobs:
           npm install
           npm run build
 
-      # Package application
+      # Package application using PowerShell
       - name: Package Application
         run: |
-          mkdir output
-          zip -r output/ReactApp.zip ./build
+          New-Item -ItemType Directory -Path output -Force
+          Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip
 
       # Deploy to IIS
       - name: Deploy to IIS
