@@ -1,1 +1,36 @@
+name: Deploy to IIS Server
 
+on:
+  push:
+    branches:
+      - main  # Deploy on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '7.0.x'  # Specify the .NET version you're using
+
+      - name: Publish the application
+        run: |
+          dotnet publish -c Release -o ./publish
+
+      - name: Deploy to IIS using Web Deploy
+        run: |
+          New-WebDeploymentPackage -sourcePath ./publish -destHostName ${{ secrets.IIS_SERVER }} -destUsername ${{ secrets.IIS_USERNAME }} -destPassword ${{ secrets.IIS_PASSWORD }} -siteName ${{ secrets.IIS_SITE_NAME }}
+        env:
+          IIS_SERVER: ${{ secrets.IIS_SERVER }}
+          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          IIS_SITE_NAME: ${{ secrets.IIS_SITE_NAME }}
+
+      - name: Verify deployment
+        run: |
+          Invoke-WebRequest http://${{ secrets.IIS_SERVER }}/
