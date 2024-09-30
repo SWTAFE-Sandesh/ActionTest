@@ -1,32 +1,42 @@
-name: Deploy to IIS Server
+name: Deploy to IIS
 
 on:
   push:
     branches:
-      - main  # Deploy on push to the main branch
+      - main  # Deploy when code is pushed to the main branch
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Use a Windows environment to deploy
 
     steps:
+      # Step 1: Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
-     
-      - name: Publish the application
+      # Step 2: Install MSDeploy on the runner machine
+      - name: Setup MSDeploy
         run: |
-          dotnet publish -c Release -o ./publish
+          choco install -y msdeploy  # Install MSDeploy via Chocolatey
 
-      - name: Deploy to IIS using Web Deploy
+      # Step 3: Build your React app
+      - name: Build React app
         run: |
-          New-WebDeploymentPackage -sourcePath ./publish -destHostName ${{ secrets.IIS_SERVER }} -destUsername ${{ secrets.IIS_USERNAME }} -destPassword ${{ secrets.IIS_PASSWORD }} -siteName ${{ secrets.IIS_SITE_NAME }}
+          npm install   # Install npm dependencies
+          npm run build # Build the React app for production
+
+      # Step 4: Package the built app into a .zip file for deployment
+      - name: Package Application
+        run: |
+          mkdir output
+          zip -r output/ReactApp.zip ./build  # Zip the 'build' folder (React production build)
+
+      # Step 5: Deploy the packaged app to IIS using MSDeploy
+      - name: Deploy to IIS
         env:
+          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}  # GitHub secrets for security
+          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          IIS_SITE_NAME: ${{ secrets.IIS_SITE_NAME }}
-
-      - name: Verify deployment
+          IIS_SITE: ${{ secrets.IIS_SITE }}  # Name of your IIS site
         run: |
-          Invoke-WebRequest http://${{ secrets.IIS_SERVER }}/
+          msdeploy -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName=$IIS_SERVER,username=$IIS_USERNAME,password=$IIS_PASSWORD,authtype=Basic -setParam:name='IIS Web Application Name',value='$IIS_SITE'
