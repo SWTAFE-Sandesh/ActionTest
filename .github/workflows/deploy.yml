@@ -13,12 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Manually Download and Install MSDeploy
-      - name: Install MSDeploy
-        run: |
-          Invoke-WebRequest -Uri https://download.microsoft.com/download/F/B/5/FB54A1B1-B143-4EE0-BB38-9DF4B85A5B0D/WebDeploy_amd64_en-US.msi -OutFile WebDeploy.msi
-          Start-Process msiexec.exe -Wait -ArgumentList '/I WebDeploy.msi /quiet /norestart'
-
       # Build React app
       - name: Build React app
         run: |
@@ -38,5 +32,8 @@ jobs:
           IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
           IIS_SITE: ${{ secrets.IIS_SITE }}
+        run: |
+          msdeploy -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName=$IIS_SERVER,username=$IIS_USERNAME,password=$IIS_PASSWORD,authtype=Basic -setParam:name='IIS Web Application Name',value='$IIS_SITE'
+
         run: |
           msdeploy -verb:sync -source:package='output/ReactApp.zip' -dest:auto,computerName=$IIS_SERVER,username=$IIS_USERNAME,password=$IIS_PASSWORD,authtype=Basic -setParam:name='IIS Web Application Name',value='$IIS_SITE'
