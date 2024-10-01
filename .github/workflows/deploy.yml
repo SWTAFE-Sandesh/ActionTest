@@ -56,7 +56,7 @@ jobs:
           try {
               $username = '$env:IIS_USERNAME'
               $password = ConvertTo-SecureString '$env:IIS_PASSWORD' -AsPlainText -Force
-              $credential = New-Object System.Management.Automation.PSCredential($username, $password)
+              $credential = New-Object System.Management.Automation.PSCredential($username)
 
               # Check if credential was created successfully
               if (-not $credential) {
