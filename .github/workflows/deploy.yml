@@ -1,56 +1,39 @@
-name: Deploy to IIS
+name: Deploy React App to IIS
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on pushes to the main branch
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # You can use 'windows-latest' if needed
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20' # Specify the Node.js version
+          node-version: '14'  # Adjust this to your needs
 
-      - name: Install dependencies
+      - name: Install dependencies and build the app
         run: |
           npm install
-
-      - name: Build React App
-        run: |
           npm run build
-
-      # Set up the PATH for MSDeploy
-      - name: Add MSDeploy to PATH
-        run: |
-          echo "C:\Program Files\IIS\Microsoft Web Deploy V3" >> $GITHUB_PATH
-
-      # Optional: Check PATH to verify if MSDeploy path is set
-      - name: Check PATH
-        run: |
-          echo $Env:PATH
-
-      - name: Package Application
-        run: |
-          mkdir output
-          powershell -Command "Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip"
 
       - name: Deploy to IIS
         env:
-          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
-          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
-          IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          IIS_SITE: ${{ secrets.IIS_SITE }}
+          IIS_SERVER: ${{ secrets.IIS_SERVER }}  # Set this secret in GitHub
+          IIS_USER: ${{ secrets.IIS_USER }}      # Set this secret in GitHub
+          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }} # Set this secret in GitHub
+          DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }} # Set this secret in GitHub
         run: |
-          & 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe' `
-          -verb:sync `
-          -source:package='output/ReactApp.zip' `
-          -dest:auto,computerName='$IIS_SERVER',username='$IIS_USERNAME',password='$IIS_PASSWORD',authtype=Basic `
-          -setParam:name='$IIS_SITE'
-
+          echo "Deploying to IIS server..."
+          # Use PowerShell to copy files to the IIS server
+          pwsh -Command "
+          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential (New-Object System.Management.Automation.PSCredential($env:IIS_USER, (ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force)))
+          Copy-Item -Path './build/*' -Destination $env:DESTINATION_PATH -Recurse -ToSession $session
+          Remove-PSSession -Session $session
+          "
