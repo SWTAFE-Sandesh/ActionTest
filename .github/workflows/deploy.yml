@@ -43,15 +43,19 @@ jobs:
 
       - name: Deploy to IIS
         env:
-          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
-          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
-          IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          IIS_SITE: ${{ secrets.IIS_SITE }}
+          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}  # Make sure this is set in GitHub Secrets
+          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}  # Make sure this is set in GitHub Secrets
+          IIS_SERVER: ${{ secrets.IIS_SERVER }}      # Make sure this is set in GitHub Secrets
+          DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }}  # Use your existing secret
         run: |
           echo "Deploying to IIS server..."
           # Use PowerShell to copy files to the IIS server
           pwsh -Command "
-          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential (New-Object System.Management.Automation.PSCredential($env:IIS_USERNAME, (ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force)))
-          Copy-Item -Path './output/ReactApp.zip' -Destination 'C:\inetpub\wwwroot\$env:IIS_SITE' -Recurse -ToSession $session
+          $username = $env:IIS_USERNAME
+          $password = ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential($username, $password)
+          
+          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential $credential
+          Copy-Item -Path './output/ReactApp.zip' -Destination $env:DESTINATION_PATH -Recurse -ToSession $session
           Remove-PSSession -Session $session
           "
