@@ -1,34 +1,52 @@
-name: Deploy React App to IIS
+name: Deploy to IIS
 
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # You can use 'windows-latest' if needed
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Adjust this to your needs
+          node-version: '20' # Specify the Node.js version
 
-      - name: Install dependencies and build the app
+      - name: Install dependencies
         run: |
           npm install
+
+      - name: Build React App
+        run: |
           npm run build
+
+      # Set up the PATH for MSDeploy
+      - name: Add MSDeploy to PATH
+        run: |
+          echo "C:\Program Files\IIS\Microsoft Web Deploy V3" >> $GITHUB_PATH
+
+      # Optional: Check PATH to verify if MSDeploy path is set
+      - name: Check PATH
+        run: |
+          echo $Env:PATH
+
+      - name: Package Application
+        run: |
+          mkdir output
+          powershell -Command "Compress-Archive -Path ./build/* -DestinationPath ./output/ReactApp.zip"
 
       - name: Deploy to IIS
         env:
-          IIS_SERVER: ${{ secrets.IIS_SERVER }}  # Set this secret in GitHub
-          IIS_USER: ${{ secrets.IIS_USER }}      # Set this secret in GitHub
-          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }} # Set this secret in GitHub
-          DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }} # Set this secret in GitHub
+          IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
+          IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
+          IIS_SERVER: ${{ secrets.IIS_SERVER }}
+          IIS_SITE: ${{ secrets.IIS_SITE }}
         run: |
           echo "Deploying to IIS server..."
           # Use PowerShell to copy files to the IIS server
