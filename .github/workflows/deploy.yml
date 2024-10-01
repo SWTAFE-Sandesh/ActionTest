@@ -49,9 +49,6 @@ jobs:
           DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }}
         run: |
           echo "Deploying to IIS server..."
-          pwsh -Command "
-          $securePassword = ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential($env:IIS_USER, $securePassword)
-
-          
-          "
+      
+          echo $securePassword
+         
