@@ -46,12 +46,18 @@ jobs:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
           IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          IIS_SITE: ${{ secrets.IIS_SITE }}
+          DESTINATION_PATH: ${{ secrets.IIS_SITE }}  # Assuming you have set IIS_SITE as the destination path
         run: |
           echo "Deploying to IIS server..."
           # Use PowerShell to copy files to the IIS server
           pwsh -Command "
-          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential (New-Object System.Management.Automation.PSCredential($env:IIS_USER, (ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force)))
-          Copy-Item -Path './build/*' -Destination $env:DESTINATION_PATH -Recurse -ToSession $session
+          $securePassword = ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential($env:IIS_USERNAME, $securePassword)
+          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential $credential
+          
+          # Copy the packaged application to the destination path on the IIS server
+          Copy-Item -Path './output/ReactApp.zip' -Destination $env:DESTINATION_PATH -ToSession $session
+
+          # Remove the session
           Remove-PSSession -Session $session
           "
