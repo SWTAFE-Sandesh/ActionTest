@@ -46,7 +46,7 @@ jobs:
           IIS_USERNAME: ${{ secrets.IIS_USERNAME }}
           IIS_PASSWORD: ${{ secrets.IIS_PASSWORD }}
           IIS_SERVER: ${{ secrets.IIS_SERVER }}
-          DESTINATION_PATH: ${{ secrets.IIS_SITE }}  # Assuming you have set IIS_SITE as the destination path
+          DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }}  # Assuming you have set IIS_SITE as the destination path
         run: |
           echo "Deploying to IIS server..."
           # Use PowerShell to copy files to the IIS server
