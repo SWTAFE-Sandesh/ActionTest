@@ -52,7 +52,6 @@ jobs:
           pwsh -Command "
           $securePassword = ConvertTo-SecureString $env:IIS_PASSWORD -AsPlainText -Force
           $credential = New-Object System.Management.Automation.PSCredential($env:IIS_USER, $securePassword)
-          $session = New-PSSession -ComputerName $env:IIS_SERVER -Credential $credential
-          Copy-Item -Path './build/*' -Destination $env:DESTINATION_PATH -Recurse -ToSession $session
-          Remove-PSSession -Session $session
+
+          
           "
