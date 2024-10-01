@@ -49,27 +49,6 @@ jobs:
           DESTINATION_PATH: ${{ secrets.DESTINATION_PATH }}  # Use your existing secret
         run: |
           echo "Deploying to IIS server..."
-          # Use PowerShell to copy files to the IIS server
-          pwsh -Command "
-          $username = '$env:IIS_USERNAME'
-          $password = ConvertTo-SecureString '$env:IIS_PASSWORD' -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential($username, $password)
-
-          # Check if credential was created successfully
-          if (-not $credential) {
-              Write-Error 'Failed to create PSCredential object.'
-              exit 1
-          }
-
-          $session = New-PSSession -ComputerName '$env:IIS_SERVER' -Credential $credential
-
-          # Check if session was created successfully
-          if (-not $session) {
-              Write-Error 'Failed to create PowerShell session.'
-              exit 1
-          }
-
-          Copy-Item -Path './output/ReactApp.zip' -Destination '$env:DESTINATION_PATH' -Recurse -ToSession $session
-
-          Remove-PSSession -Session $session
-          "
+          echo "IIS_SERVER: $env:IIS_SERVER"
+          echo "IIS_USERNAME: $env:IIS_USERNAME"  # Don't print the password for security reasons
+          echo "DESTINATION_PATH: $env:DESTINATION_PATH"
